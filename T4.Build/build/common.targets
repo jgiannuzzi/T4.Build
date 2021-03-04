@@ -1,0 +1,52 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <PropertyGroup>
+        <!-- Indicates whether only out of date templates should be transformed, or whether all
+             templates should be transformed. -->
+        <TextTemplateTransformSkipUpToDate Condition=" '$(TextTemplateTransformSkipUpToDate)' == '' ">true</TextTemplateTransformSkipUpToDate>
+
+        <!-- Indicates whether templates should be transformed in parallel, or whether they should 
+             be transformed sequentially. -->
+        <TextTemplateTransformParallel Condition=" '$(TextTemplateTransformParallel)' == '' ">true</TextTemplateTransformParallel>
+
+        <!-- Indicates whether all *.tt files should be automatically transformed -->
+        <TextTemplateTransformAll Condition=" '$(TextTemplateTransformAll)' == '' ">true</TextTemplateTransformAll>
+
+        <!-- Indicates whether template transform/clean should happen automatically during build/clean -->
+        <TextTemplateTransformOnBuild Condition=" '$(TextTemplateTransformOnBuild)' == '' ">true</TextTemplateTransformOnBuild>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <T4Build_Command>dotnet exec $(MSBuildThisFileDirectory)../tools/T4.Build.dll</T4Build_Command>
+    </PropertyGroup>
+
+    <Target Name="TextTemplateCreateTransformList">
+        <ItemGroup>
+            <T4Build_TransformFiles Include="@(None)" Condition=" '%(None.Generator)' == 'TextTemplatingFileGenerator' " />
+            <T4Build_TransformFiles Include="@(TextTemplateTransformFiles)" />
+        </ItemGroup>
+        <ItemGroup Condition=" '$(TextTemplateTransformAll)' == 'true' ">
+            <T4Build_TransformFiles Remove="**/*.tt" />
+            <T4Build_TransformFiles Include="**/*.tt" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="TextTemplateTransform" DependsOnTargets="TextTemplateCreateTransformList">
+        <ItemGroup>
+            <T4Build_TransformOptions Include="--skip-up-to-date" Condition=" '$(TextTemplateTransformSkipUpToDate)' == 'true' " />
+            <T4Build_TransformOptions Include="--parallel" Condition=" '$(TextTemplateTransformParallel)' == 'true' " />
+        </ItemGroup>
+        <Exec Command="$(T4Build_Command) transform @(T4Build_TransformOptions, ' ') @(T4Build_TransformFiles, ' ')" Condition=" '@(T4Build_TransformFiles)' != '' " ConsoleToMSBuild="true" StandardOutputImportance="normal">
+            <Output TaskParameter="ConsoleOutput" ItemName="T4Build_GeneratedFiles" />
+        </Exec>
+        <ItemGroup>
+            <Compile Remove="@(T4Build_GeneratedFiles)" Condition=" '%(T4Build_GeneratedFiles.Extension)' == '.cs' " />
+            <Compile Include="@(T4Build_GeneratedFiles)" Condition=" '%(T4Build_GeneratedFiles.Extension)' == '.cs' " />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="TextTemplateClean" DependsOnTargets="TextTemplateCreateTransformList">
+        <Exec Command="$(T4Build_Command) clean @(T4Build_TransformFiles, ' ')" Condition=" '@(T4Build_TransformFiles)' != '' " ConsoleToMSBuild="true" StandardOutputImportance="normal" />
+    </Target>
+
+</Project>

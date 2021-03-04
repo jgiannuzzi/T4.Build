@@ -1,0 +1,13 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <Import Project="common.targets" />
+
+    <Target Name="TextTemplateTransformOnBuild" BeforeTargets="BeforeBuild">
+        <CallTarget Targets="TextTemplateTransform" Condition=" '$(TextTemplateTransformOnBuild)' == 'true' " />
+    </Target>
+
+    <Target Name="TextTemplateCleanOnBuild" AfterTargets="Clean">
+        <CallTarget Targets="TextTemplateClean" Condition=" '$(TextTemplateTransformOnBuild)' == 'true' " />
+    </Target>
+
+</Project>

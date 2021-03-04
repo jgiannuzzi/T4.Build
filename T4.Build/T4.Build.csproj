@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RollForward>LatestMajor</RollForward>
+  </PropertyGroup>
+
+  <!-- Accomodate for the fact that our NuGet is not truly a tool or a library either. -->
+  <!-- This means a few things we would get for free have to be defined explicitly. -->
+  <PropertyGroup>
+    <Version Condition=" '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
+    <Version Condition=" '$(Version)' == '' ">$(VersionPrefix)</Version>
+    <NuspecFile>$(MSBuildProjectName).nuspec</NuspecFile>
+    <NuspecProperties>configuration=$(Configuration);framework=$(TargetFramework);version=$(Version)</NuspecProperties>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\t4\Mono.TextTemplating\Mono.TextTemplating.csproj" />
+  </ItemGroup>
+
+</Project>

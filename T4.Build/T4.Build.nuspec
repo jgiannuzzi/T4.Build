@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>T4.Build</id>
+    <version>$version$</version>
+    <authors>Jonathan Giannuzzi</authors>
+    <description>Tool to automatically transform T4 templates during build</description>
+    <licenseExpression>Apache-2.0</licenseExpression>
+  </metadata>
+  <files>
+    <file src="bin/$configuration$/$framework$/*.dll" target="tools/" />
+    <file src="bin/$configuration$/$framework$/*.runtimeconfig.json" target="tools/" />
+    <file src="build/common.targets" target="build/common.targets" />
+    <file src="build/single.targets" target="build/T4.Build.targets" />
+    <file src="build/multi.targets" target="buildMultitargeting/T4.Build.targets" />
+  </files>
+</package>
