@@ -15,6 +15,7 @@ namespace T4.Build
         public BuildTemplateGenerator(string template)
         {
             TemplateFile = template;
+            Engine.UseInProcessCompiler();
         }
 
         public string[] IncludedFiles
