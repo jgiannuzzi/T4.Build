@@ -42,7 +42,7 @@ namespace T4.Build
 
         static int Transform(FileInfo[] templates, int lockTimeout, bool skipUpToDate, bool parallel)
         {
-            using (var locker = new Lock($".T4.Build.transform.{ComputeHash(templates)}.lock", lockTimeout))
+            using (var locker = new Lock($"Global\\T4.Build.transform.{ComputeHash(templates)}.lock", lockTimeout))
             {
                 var errorQueue = new ConcurrentQueue<CompilerErrorCollection>();
                 var didSomeWork = false;
@@ -84,7 +84,7 @@ namespace T4.Build
 
         static int Clean(FileInfo[] templates, int lockTimeout)
         {
-            using (var locker = new Lock($".T4.Build.clean.{ComputeHash(templates)}.lock", lockTimeout))
+            using (var locker = new Lock($"Global\\T4.Build.clean.{ComputeHash(templates)}.lock", lockTimeout))
             {
                 var hasErrors = false;
 
