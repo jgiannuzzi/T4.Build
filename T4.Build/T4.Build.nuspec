@@ -11,7 +11,7 @@
     <licenseUrl>https://licenses.nuget.org/Apache-2.0</licenseUrl>
   </metadata>
   <files>
-    <file src="bin/$configuration$/$framework$/*.dll" target="tools/" />
+    <file src="bin/$configuration$/$framework$/*.dll" exclude="**/Microsoft.CodeAnalysis*.dll;**/System.Reflection.Metadata.dll;**/System.Collections.Immutable.dll" target="tools/" />
     <file src="bin/$configuration$/$framework$/*.runtimeconfig.json" target="tools/" />
     <file src="build/common.targets" target="build/common.targets" />
     <file src="build/single.targets" target="build/T4.Build.targets" />
