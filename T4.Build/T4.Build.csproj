@@ -14,7 +14,6 @@
     <Version Condition=" '$(Version)' == '' ">$(VersionPrefix)</Version>
     <NuspecFile>$(MSBuildProjectName).nuspec</NuspecFile>
     <NuspecProperties>configuration=$(Configuration);framework=$(TargetFramework);version=$(Version)</NuspecProperties>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
