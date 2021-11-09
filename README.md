@@ -14,7 +14,7 @@ Just add these lines to your project file:
 
 ```xml
 <ItemGroup>
-    <PackageReference Include="T4.Build" Version="0.2.1" PrivateAssets="All" />
+    <PackageReference Include="T4.Build" Version="0.2.2" PrivateAssets="All" />
 </ItemGroup>
 ```
 
