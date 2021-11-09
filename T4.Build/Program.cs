@@ -1,5 +1,6 @@
 ﻿using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -44,6 +45,7 @@ namespace T4.Build
         {
             using (var locker = new Lock($"Global\\T4.Build.transform.{ComputeHash(templates)}.lock", lockTimeout))
             {
+                var outputQueue = new ConcurrentQueue<String>();
                 var errorQueue = new ConcurrentQueue<CompilerErrorCollection>();
                 var didSomeWork = false;
                 var stopwatch = new Stopwatch();
@@ -63,7 +65,7 @@ namespace T4.Build
                             if (generator.Errors.HasErrors)
                                 errorQueue.Enqueue(generator.Errors);
                             else
-                                Console.WriteLine(generator.OutputFile);
+                                outputQueue.Enqueue(generator.OutputFile);
                         }
                         catch (Exception e)
                         {
@@ -71,6 +73,12 @@ namespace T4.Build
                         }
                     });
                 stopwatch.Stop();
+
+                // Sort the generated file names so that the MSBuild compilation cache hash remains stable
+                var outputs = outputQueue.ToArray();
+                Array.Sort(outputs, new CaseInsensitiveComparer());
+                foreach (var output in outputs)
+                    Console.WriteLine(output);
 
                 if (didSomeWork && errorQueue.IsEmpty)
                     Console.Error.WriteLine($"Templates transformed for {Path.GetFileName(Directory.GetCurrentDirectory())} (in {stopwatch.ElapsedMilliseconds / 1000.0} sec).");
