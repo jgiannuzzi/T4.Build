@@ -4,11 +4,22 @@
     <id>T4.Build</id>
     <version>$version$</version>
     <authors>Jonathan Giannuzzi</authors>
-    <description>Tool to automatically transform T4 templates during build</description>
+    <description>
+      T4.Build is a tool to automatically transform T4 templates during build.
+
+      It is similar to the functionality provided by Visual Studio, except it works anywhere where you have a .NET (Core) runtime installed.
+
+      It is fully integrated with MSBuild and supports transforming the templates during the build process, and cleaning them during the clean process.
+
+      T4.Build aims for performance by transforming only the templates that have changed, and doing so in parallel (so more CPU cores => faster).
+
+      More information: https://github.com/jgiannuzzi/T4.Build#readme
+    </description>
     <repository type="git" url="https://github.com/jgiannuzzi/T4.Build" />
     <projectUrl>https://github.com/jgiannuzzi/T4.Build</projectUrl>
     <license type="expression">Apache-2.0</license>
     <licenseUrl>https://licenses.nuget.org/Apache-2.0</licenseUrl>
+    <tags>MSBuild build T4 text template templating transform</tags>
   </metadata>
   <files>
     <file src="bin/$configuration$/$framework$/*.dll" exclude="**/Microsoft.CodeAnalysis*.dll;**/System.Reflection.Metadata.dll;**/System.Collections.Immutable.dll" target="tools/" />
