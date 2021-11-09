@@ -78,9 +78,7 @@ namespace T4.Build
                 var outputs = outputQueue.ToArray();
                 Array.Sort(outputs, new CaseInsensitiveComparer());
                 foreach (var output in outputs)
-                {
                     Console.WriteLine(output);
-                }
 
                 if (didSomeWork && errorQueue.IsEmpty)
                     Console.Error.WriteLine($"Templates transformed for {Path.GetFileName(Directory.GetCurrentDirectory())} (in {stopwatch.ElapsedMilliseconds / 1000.0} sec).");
