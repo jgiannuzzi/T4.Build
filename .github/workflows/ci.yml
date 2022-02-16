@@ -13,6 +13,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.201
+      - name: Pin .NET Core SDK
+        run: dotnet new globaljson --sdk-version 5.0.201
       - name: Restore tools
         run: dotnet tool restore
       - name: Check format
