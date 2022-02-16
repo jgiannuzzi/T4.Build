@@ -17,7 +17,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <T4Build_Command>dotnet exec $(MSBuildThisFileDirectory)../tools/T4.Build.dll</T4Build_Command>
+        <T4Build_Command>dotnet exec "$(MSBuildThisFileDirectory)../tools/T4.Build.dll"</T4Build_Command>
     </PropertyGroup>
 
     <Target Name="TextTemplateCreateTransformList">
