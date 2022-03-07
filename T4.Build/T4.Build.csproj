@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="Mono.TextTemplating.Roslyn" Version="2.2.1" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta3.22114.1" />
   </ItemGroup>
 
   <ItemGroup>
