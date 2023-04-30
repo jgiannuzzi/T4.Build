@@ -2,6 +2,7 @@
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Diagnostics;
@@ -30,7 +31,12 @@ namespace T4.Build
             transformCommand.Add(skipOption);
             var parallelOption = new Option<bool>(new[] { "--parallel", "-p" }, "Transform templates in parallel");
             transformCommand.Add(parallelOption);
-            transformCommand.Handler = CommandHandler.Create<FileInfo[], int, bool, bool>(Transform);
+            var variableOptions = new Option<string[]>(new[] { "--variable", "-v" }, "T4ParameterValues variable to replace within the template; syntax is \"Include=Value\"")
+            {
+                AllowMultipleArgumentsPerToken = false,
+            };
+            transformCommand.Add(variableOptions);
+            transformCommand.Handler = CommandHandler.Create<FileInfo[], int, bool, bool, string[]>(Transform);
             rootCommand.Add(transformCommand);
 
             var cleanCommand = new Command("clean", "List the output files");
@@ -41,7 +47,7 @@ namespace T4.Build
             return rootCommand.InvokeAsync(args).Result;
         }
 
-        static int Transform(FileInfo[] templates, int lockTimeout, bool skipUpToDate, bool parallel)
+        static int Transform(FileInfo[] templates, int lockTimeout, bool skipUpToDate, bool parallel, string[] variable)
         {
             using (var locker = new Lock($"Global\\T4.Build.transform.{ComputeHash(templates)}.lock", lockTimeout))
             {
@@ -50,12 +56,13 @@ namespace T4.Build
                 var didSomeWork = false;
                 var stopwatch = new Stopwatch();
 
+                var t4ParameterValues = ProcessT4ParameterValues(variable);
                 stopwatch.Start();
                 Parallel.ForEach(templates,
                     new ParallelOptions { MaxDegreeOfParallelism = parallel ? -1 : 1 },
                     t =>
                     {
-                        var generator = new BuildTemplateGenerator(t.ToString());
+                        var generator = new BuildTemplateGenerator(t.ToString(), templateContent => PreprocessTemplate(templateContent, t4ParameterValues));
                         try
                         {
                             bool skipped;
@@ -175,6 +182,42 @@ namespace T4.Build
 
             Console.ForegroundColor = oldColor;
         }
+
+        static IReadOnlyDictionary<string, string> ProcessT4ParameterValues(string[] variableSets)
+        {
+            if (variableSets?.Any() != true)
+            {
+                return null;
+            }
+
+            var t4ParameterValues = new Dictionary<string, string>(variableSets.Length);
+            foreach (var variableSet in variableSets)
+            {
+                var pair = variableSet.Split('=', 2, StringSplitOptions.None);
+                t4ParameterValues.Add($"$({pair[0]})", pair[1]);
+            }
+
+            return t4ParameterValues;
+        }
+
+        static string PreprocessTemplate(string templateContent, IReadOnlyDictionary<string, string> t4ParameterValues)
+        {
+            if (string.IsNullOrWhiteSpace(templateContent) || t4ParameterValues?.Keys.Any() != true)
+            {
+                return templateContent;
+            }
+
+            var replacementBuilder = (StringBuilder)null;
+            foreach (var t4ParameterValuesPair in t4ParameterValues)
+            {
+                if (replacementBuilder is null && templateContent.IndexOf(t4ParameterValuesPair.Key) > -1)
+                {
+                    replacementBuilder = new StringBuilder(templateContent);
+                }
+                replacementBuilder?.Replace(t4ParameterValuesPair.Key, t4ParameterValuesPair.Value);
+            }
+
+            return replacementBuilder is null ? templateContent : replacementBuilder.ToString();
+        }
     }
 }
-
