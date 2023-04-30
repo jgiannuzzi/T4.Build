@@ -31,10 +31,24 @@
         </ItemGroup>
     </Target>
 
-    <Target Name="TextTemplateTransform" DependsOnTargets="TextTemplateCreateTransformList">
+    <Target Name="TextTemplateCreateParameterValueList" Inputs="@(T4ParameterValues)" Outputs="%(T4ParameterValues.Identity)">
+        <PropertyGroup>
+            <T4Build_ParameterIdentity>%(T4ParameterValues.Identity)</T4Build_ParameterIdentity>
+            <T4Build_ParameterValue>%(T4ParameterValues.Value)</T4Build_ParameterValue>
+        </PropertyGroup>
+        <PropertyGroup>
+            <T4Build_ParameterValue>$(T4Build_ParameterValue.Replace('"', '""'))</T4Build_ParameterValue>
+        </PropertyGroup>
+        <ItemGroup>
+            <T4Build_ParameterValueList Include="--variable &quot;$(T4Build_ParameterIdentity)=$(T4Build_ParameterValue)&quot;" Condition="!$([System.String]::IsNullOrWhiteSpace('$(T4Build_ParameterIdentity)'))" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="TextTemplateTransform" DependsOnTargets="TextTemplateCreateTransformList;TextTemplateCreateParameterValueList">
         <ItemGroup>
             <T4Build_TransformOptions Include="--skip-up-to-date" Condition=" '$(TextTemplateTransformSkipUpToDate)' == 'true' " />
             <T4Build_TransformOptions Include="--parallel" Condition=" '$(TextTemplateTransformParallel)' == 'true' " />
+            <T4Build_TransformOptions Include="@(T4Build_ParameterValueList, ' ')" />
         </ItemGroup>
         <Exec Command="$(T4Build_Command) transform @(T4Build_TransformOptions, ' ') @(T4Build_TransformFiles, ' ')" Condition=" '@(T4Build_TransformFiles)' != '' " ConsoleToMSBuild="true" StandardOutputImportance="normal">
             <Output TaskParameter="ConsoleOutput" ItemName="T4Build_GeneratedFiles" />
