@@ -22,7 +22,7 @@
 
     <Target Name="TextTemplateCreateTransformList">
         <ItemGroup>
-            <T4Build_TransformFiles Include="@(None)" Condition=" '%(None.Generator)' == 'TextTemplatingFileGenerator' " />
+            <T4Build_TransformFiles Include="@(Compile);@(None);@(Content);@(EmbeddedResource)" Condition=" '%(*.Generator)' == 'TextTemplatingFileGenerator' " />
             <T4Build_TransformFiles Include="@(TextTemplateTransformFiles)" />
         </ItemGroup>
         <ItemGroup Condition=" '$(TextTemplateTransformAll)' == 'true' ">
