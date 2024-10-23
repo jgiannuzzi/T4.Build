@@ -36,7 +36,7 @@
             <T4Build_TransformOptions Include="--skip-up-to-date" Condition=" '$(TextTemplateTransformSkipUpToDate)' == 'true' " />
             <T4Build_TransformOptions Include="--parallel" Condition=" '$(TextTemplateTransformParallel)' == 'true' " />
         </ItemGroup>
-        <Exec Command="$(T4Build_Command) transform @(T4Build_TransformOptions, ' ') @(T4Build_TransformFiles, ' ')" Condition=" '@(T4Build_TransformFiles)' != '' " ConsoleToMSBuild="true" StandardOutputImportance="normal">
+        <Exec Command="$(T4Build_Command) transform @(T4Build_TransformOptions, ' ') @(T4Build_TransformFiles->'&quot;%(Identity)&quot;', ' ')" Condition=" '@(T4Build_TransformFiles)' != '' " ConsoleToMSBuild="true" StandardOutputImportance="normal">
             <Output TaskParameter="ConsoleOutput" ItemName="T4Build_GeneratedFiles" />
         </Exec>
         <ItemGroup>
@@ -46,7 +46,7 @@
     </Target>
 
     <Target Name="TextTemplateClean" DependsOnTargets="TextTemplateCreateTransformList">
-        <Exec Command="$(T4Build_Command) clean @(T4Build_TransformFiles, ' ')" Condition=" '@(T4Build_TransformFiles)' != '' " ConsoleToMSBuild="true" StandardOutputImportance="normal" />
+        <Exec Command="$(T4Build_Command) clean @(T4Build_TransformFiles->'&quot;%(Identity)&quot;', ' ')" Condition=" '@(T4Build_TransformFiles)' != '' " ConsoleToMSBuild="true" StandardOutputImportance="normal" />
     </Target>
 
 </Project>
