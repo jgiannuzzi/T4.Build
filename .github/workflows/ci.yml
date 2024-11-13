@@ -9,36 +9,36 @@ jobs:
   # Enforces the consistency of code formatting using `.editorconfig` and the `dotnet-format` tool.
   check-format:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup .NET Core SDK
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 5.0.201
+          dotnet-version: 8.0.404
       - name: Pin .NET Core SDK
-        run: dotnet new globaljson --sdk-version 5.0.201
+        run: dotnet new globaljson --sdk-version 8.0.404
       - name: Restore tools
         run: dotnet tool restore
       - name: Check format
-        run: dotnet format --check --folder T4.Build
+        run: dotnet tool run dotnet-format --check --folder T4.Build
 
   build:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
       - name: Setup .NET Core SDK
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 5.0.201
+          dotnet-version: 8.0.404
       - name: Pin .NET Core SDK
-        run: dotnet new globaljson --sdk-version 5.0.201
+        run: dotnet new globaljson --sdk-version 8.0.404
       - name: Create package
         shell: pwsh
         run: |
@@ -55,7 +55,7 @@ jobs:
           }
           dotnet pack --configuration=Release @params
       - name: Upload NuGet package artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: nuget-package
           path: T4.Build/bin/Release/T4.Build.*.nupkg
@@ -63,10 +63,10 @@ jobs:
   publish:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [check-format, build]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Download NuGet package artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: nuget-package
       - name: Publish to NuGet
