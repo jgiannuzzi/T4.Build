@@ -1,0 +1,2 @@
+# Ignore any immediate `tools` directories, as they are likely someone building and testing locally from another project
+/tools/*

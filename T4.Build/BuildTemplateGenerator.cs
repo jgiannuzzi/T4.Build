@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.CodeDom.Compiler;
 using System.IO;
+using System.Text;
 using Mono.TextTemplating;
 
 namespace T4.Build
@@ -11,11 +12,18 @@ namespace T4.Build
         List<string> includedFiles = new List<string>();
         string lockPath;
         ParsedTemplate parsedTemplate;
+        readonly Func<string, string> preprocessor = null;
 
         public BuildTemplateGenerator(string template)
         {
             TemplateFile = template;
             Engine.UseInProcessCompiler();
+        }
+
+        public BuildTemplateGenerator(string template, Func<string, string> preprocessor)
+            : this(template)
+        {
+            this.preprocessor = preprocessor;
         }
 
         public string[] IncludedFiles
@@ -98,24 +106,64 @@ namespace T4.Build
         {
             skipped = false;
 
-            if (string.IsNullOrEmpty(OutputFile))
+            var outputFile = OutputFile;
+            if (string.IsNullOrWhiteSpace(outputFile))
+            {
                 return false;
+            }
 
             if (skipUpToDate)
             {
                 var templateInfo = new FileInfo(TemplateFile);
-                var outputInfo = new FileInfo(OutputFile);
+                var outputInfo = new FileInfo(outputFile);
                 if (outputInfo.Exists
-                && templateInfo.LastWriteTime.Ticks < outputInfo.LastWriteTime.Ticks
-&& includedFiles.TrueForAll(x => (new FileInfo(x)).LastWriteTime.Ticks < outputInfo.LastWriteTime.Ticks)
+                    && templateInfo.LastWriteTime.Ticks < outputInfo.LastWriteTime.Ticks
+                    && includedFiles.TrueForAll(x => (new FileInfo(x)).LastWriteTime.Ticks < outputInfo.LastWriteTime.Ticks)
                 )
                 {
                     skipped = true;
                     return true;
                 }
             }
-            return ProcessTemplate(TemplateFile, OutputFile);
+
+            string content;
+            try
+            {
+                content = File.ReadAllText(TemplateFile);
+            }
+            catch (IOException ex)
+            {
+                Errors.Clear();
+                AddError($"Could not read input file '{TemplateFile}':\n{ex}");
+                return false;
+            }
+
+            if (!(preprocessor is null))
+            {
+                content = preprocessor(content);
+            }
+            ProcessTemplate(TemplateFile, content, ref outputFile, out var output);
+
+            try
+            {
+                if (!Errors.HasErrors)
+                {
+                    File.WriteAllText(outputFile, output, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                }
+            }
+            catch (IOException ex)
+            {
+                AddError($"Could not write output file '{outputFile}':\n{ex}");
+            }
+
+            return !Errors.HasErrors;
         }
 
+        CompilerError AddError(string error)
+        {
+            var err = new CompilerError { ErrorText = error };
+            Errors.Add(err);
+            return err;
+        }
     }
 }
