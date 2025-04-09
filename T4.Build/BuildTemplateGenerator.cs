@@ -114,7 +114,14 @@ namespace T4.Build
                     return true;
                 }
             }
-            return ProcessTemplate(TemplateFile, OutputFile);
+
+            var requestOutputFile = OutputFile;
+            var result = ProcessTemplate(TemplateFile, OutputFile);
+            if (requestOutputFile != OutputFile && File.Exists(OutputFile))
+            {
+                File.Move(OutputFile, requestOutputFile, true);
+            }
+            return result;
         }
 
     }
